@@ -1,8 +1,8 @@
 %% Note: This program calls the SIMULINK function to generate data and solves the linear regression model
 
-%  In the IEEE 39-bus system, there are 6 generators. We assume all the
-%  Inverter Air Condiioner (IAC) in the system are aggregated as one
-%  demand-side resource (DSR) to provide primary frequency reserve to the system.
+%  In the IEEE 39-bus system, there are 10 generators. We assume all the
+%  Inverter Air Condiioner (IAC) in the system are aggregated as two
+%  demand-side resources (DSR) to provide primary frequency reserve to the system.
 
 %  The output limit of the 10 generators are: [1040,646,725,652,508,687,580,564,865,1100] MW. In total, 7367 MW. 
 
@@ -22,7 +22,7 @@
 %  China, reported by reference: X. Zhuang et. al, "Data-Driven Reserve Allocation With Frequency Security 
 %  Constraint Considering Inverter Air Conditioners," in IEEE Access, vol. 7, pp. 120014-120022, 2019
 
-%  Note that due to the random number generator, the simulation results of each execution may
+%  Note that due to the random number generator in Monte Carlo simulation, the simulation results of each execution may
 %  differ !!!  
 
 
