@@ -59,7 +59,7 @@ DSR_num = 2;
 options = simset('SrcWorkspace','current');
 sim_time = 60;
 
-sim_num = 1000;
+sim_num = 10000;
 Input = zeros(sim_num,12);
 Integration = zeros(sim_num,1);
 
