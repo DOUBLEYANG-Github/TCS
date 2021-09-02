@@ -16,6 +16,8 @@
 
 %  The load damping parameter "D" is set as 2% of the total load demand, i.e. 125 MW/Hz.
 
+%  The duration of the primary frequency regulation process is taken as 60 s.
+
 %  Parameters for the IACs are chosen according to a realistic system in Haining,
 %  China, reported by reference: X. Zhuang et. al, "Data-Driven Reserve Allocation With Frequency Security 
 %  Constraint Considering Inverter Air Conditioners," in IEEE Access, vol. 7, pp. 120014-120022, 2019
