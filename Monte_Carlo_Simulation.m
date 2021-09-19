@@ -23,7 +23,7 @@
 %  Constraint Considering Inverter Air Conditioners," in IEEE Access, vol. 7, pp. 120014-120022, 2019
 
 %  Note that due to the random number generator in Monte Carlo simulation, the simulation results of each execution may
-%  differ !!!  
+%  differ a little. However, the scale of error remains stable !!!  
 
 
 clear all; close all;
