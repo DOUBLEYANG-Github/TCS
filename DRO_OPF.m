@@ -13,7 +13,7 @@
 clear all; close all;
 %% Case Parameter
 IEEE39_Parameter;
-sigma = 10 * gamma2 * residue_variance;  
+%sigma = 10 * gamma2 * residue_variance;  
 %% The equivalence of the DRO model
 %%Part I: construct the first stage constraints
 disp('start first stage model');
