@@ -1,8 +1,8 @@
 %% Note: This program calls the SIMULINK function to generate data and solves the linear regression model
 
-%  In the IEEE 39-bus system, there are 10 generators. We assume all the
-%  Inverter Air Condiioner (IAC) in the system are aggregated as two
-%  demand-side resources (DSR) to provide primary frequency reserve to the system.
+%  In the IEEE 39-bus system, there are 6 generators. We assume all the
+%  Inverter Air Condiioner (IAC) in the system are aggregated as one
+%  demand-side resource (DSR) to provide primary frequency reserve to the system.
 
 %  The output limit of the 10 generators are: [1040,646,725,652,508,687,580,564,865,1100] MW. In total, 7367 MW. 
 
@@ -16,14 +16,12 @@
 
 %  The load damping parameter "D" is set as 2% of the total load demand, i.e. 125 MW/Hz.
 
-%  The duration of the primary frequency regulation process is taken as 60 s.
-
 %  Parameters for the IACs are chosen according to a realistic system in Haining,
 %  China, reported by reference: X. Zhuang et. al, "Data-Driven Reserve Allocation With Frequency Security 
 %  Constraint Considering Inverter Air Conditioners," in IEEE Access, vol. 7, pp. 120014-120022, 2019
 
-%  Note that due to the random number generator in Monte Carlo simulation, the simulation results of each execution may
-%  differ a little. However, the scale of error remains stable !!!  
+%  Note that due to the random number generator, the simulation results of each execution may
+%  differ !!!  
 
 
 clear all; close all;
@@ -53,34 +51,39 @@ Tc  = 0.27;                                              % compressor time const
 N   = 6000/1000;                                         % 6000 IACs, divide by 1000 to change KW to MW
 
 DSR_max = 60;                                            % MW
-DSR_num = 2;               
+DSR_num = 1;       
+
+%% Battery parameters
+TB = 0.5;
+B_max = DSR_max;
+B_num = 1;
 
 %% simulation
 options = simset('SrcWorkspace','current');
 sim_time = 60;
 
-sim_num = 10000;
+sim_num = 11000;
 Input = zeros(sim_num,12);
 Integration = zeros(sim_num,1);
 
 i = 1;
 while i <= sim_num
     Re = PFR_max .* rand(1,10);    % upper bound of Gen reserve
-    Pa = DSR_max * rand(1,2);      % upper bound of IAC reserve
-    
+    Pa = DSR_max * rand(1,1);      % upper bound of IAC reserve
+    Pb = B_max * rand(1,1);        % upper bound of battery reserve
     % We nned to guarantee adequate reserve, so that the quasi-steady state frequency
     % can satisfy the requirement. delta_f_qss = (dP + reserve)/D >= -0.5,
     % i.e.,  reserve >= -dP*0.8;
     % Meanwhile, we need to leave some reserve margin for the secondary frequency
     % regulation process, i.e., reserve <= -dP*0.95.
     
-    reserve = sum(Re)+sum(Pa);
+    reserve = sum(Re)+Pa+Pb;
     if reserve >= -dP*0.8 &&  reserve <= -dP*0.95       
        [T,X,Y] =sim('Simulink_IEEE_39_two_DSR',sim_time,options);
        Frequency = Y(:,1);
-       Input(i,:) = [Re,Pa];
+       Input(i,:) = [Re,Pa,Pb];
        Integration(i) = -mean(Frequency)*60; 
-       i = i+1;
+       i = i+1
     end
     
 end
@@ -96,9 +99,9 @@ mdl.Coefficients
 Coefficient = mdl.Coefficients.Estimate;
 %save('Coefficient.mat','Coefficient');
 
-if mdl.coefTest <= 0.01 && mdl.Coefficients.pValue <=0.01
+if mdl.coefTest <= 0.01 && max(mdl.Coefficients.pValue) <=0.01
     disp('The linear regression model is statistically significant!')
-elseif mdl.coefTest >= 0.05 || mdl.Coefficients.pValue >=0.05
+elseif mdl.coefTest >= 0.05 || max(mdl.Coefficients.pValue) >=0.05
     disp('Warning: The linear regression model may not be statistically significant!')
 end
 %scatter3(Re_input(:,1),Input(:,2),Integration,'.')
@@ -129,10 +132,10 @@ for i = 1:k
     test_classes = dataset(cv.test(i),:);     % cv.test(i) returns the label of test set     
     train_classes = dataset(~cv.test(i),:);
     
-    X_train = train_classes(:,1:gen_num+DSR_num);
-    Y_train = train_classes(:,gen_num+DSR_num+1);
-    X_test  = test_classes(:,1:gen_num+DSR_num);
-    Y_test  = test_classes(:,gen_num+DSR_num+1);
+    X_train = train_classes(:,1:gen_num+DSR_num+B_num);
+    Y_train = train_classes(:,gen_num+DSR_num+B_num+1);
+    X_test  = test_classes(:,1:gen_num+DSR_num+B_num);
+    Y_test  = test_classes(:,gen_num+DSR_num+B_num+1);
     
     mdl = fitlm(X_train,Y_train);            % fit the linear regression model
     Y_pred = predict(mdl,X_test);
